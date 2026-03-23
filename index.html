@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cubo 3x3 Branco com Divisórias</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // CONFIGURAÇÕES
+        // Diminuí o tamanho para 0.95 para o espaçamento ficar bem visível
+        const geometria = new THREE.BoxGeometry(0.95, 0.95, 0.95);
+        
+        // Material branco puro (não reage a luz, por isso não fica cinza)
+        const materialBranco = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        
+        // Material da linha (preto) para criar a separação visual
+        const materialBorda = new THREE.LineBasicMaterial({ color: 0x000000 });
+
+        for (let x = -1; x <= 1; x++) {
+            for (let y = -1; y <= 1; y++) {
+                for (let z = -1; z <= 1; z++) {
+                    // 1. Cria o cubo branco
+                    const cubinho = new THREE.Mesh(geometria, materialBranco);
+                    cubinho.position.set(x, y, z);
+                    
+                    // 2. Cria as linhas das bordas (essencial para ver o espaçamento)
+                    const bordasGeometria = new THREE.EdgesGeometry(geometria);
+                    const moldura = new THREE.LineSegments(bordasGeometria, materialBorda);
+                    
+                    // Adiciona a moldura como "filha" do cubinho
+                    cubinho.add(moldura);
+                    
+                    scene.add(cubinho);
+                }
+            }
+        }
+
+        camera.position.set(5, 5, 5);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
